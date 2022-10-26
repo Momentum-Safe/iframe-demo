@@ -1,43 +1,38 @@
 import { useEffect, useState } from "react";
-import { Connector } from "./iframe/connector";
-import { JsonRPCClient } from "./iframe/jsonrpc";
+import { MsafeWallet } from "./iframe/MsafeWallet";
 
 const msafeUrl = "http://localhost:3000";
 function ChildIFrame() {
-    const [connector, setConnector] = useState<Connector>();
-    const [client, setClient] = useState<JsonRPCClient>();
+    const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState<string>();
     const [error, setError] = useState<string>();
     const [notification, setNotification] = useState<string>();
 
     // child connect to msafe
     async function connect() {
-        if (connector) return;
-        const c = await Connector.connect(window.parent, msafeUrl);
-        setConnector(c);
-        setClient(
-            new JsonRPCClient(c, {
-                location(url: string) {
-                    setNotification(url);
-                },
-            })
-        );
+        if (wallet) return;
+        const w = await MsafeWallet.new();
+        w.onChangeAccount((account)=>setNotification(JSON.stringify(account)));
+        w.onChangeNetwork((network)=>{
+            setNotification(network)
+        });
+        setWallet(w);
     }
     async function signTransaction(tx: string) {
-        if (client) {
+        if (wallet) {
             try {
-                const response = await client.request("signTransaction", [tx]);
-                setResponse(response);
+                const response = await wallet.signTransaction(Buffer.from(tx));
+                setResponse(Buffer.from(response).toString());
                 setError(undefined);
             } catch (e: any) {
                 setResponse(undefined);
-                setError(e.message);
+                setError(Buffer.from(e.message).toString());
             }
         }
     }
     useEffect(() => {
         connect();
-    }, [connector]);
+    }, [wallet]);
     return (
         <>
             <p>===================child frame: {window.location.href}</p>
@@ -50,7 +45,7 @@ function ChildIFrame() {
             </button>
             <p>
                 handshake:
-                {connector && connector.connected
+                {wallet && wallet.client.connector.connected
                     ? "connected"
                     : "disconnected"}
             </p>
