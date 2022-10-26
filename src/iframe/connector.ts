@@ -1,8 +1,8 @@
 export class Connector {
     static CONNECT_REQ = 'CONNECT_REQ';
     static CONNECT_ACK = 'CONNECT_ACK';
-    onClose?: ()=>void;
-    onMessage?: (data:any)=>void;
+    onClose?: () => void;
+    onMessage?: (data: any) => void;
     constructor(public readonly port: MessagePort, public connected: boolean) {
         this.port.onmessage = (ev) => {
             this.onMessage && this.onMessage(ev.data);
@@ -17,8 +17,8 @@ export class Connector {
         this.port.postMessage(data);
     }
 
-    on(type:'close'|'message', handle: (data?:string)=>void) {
-        switch(type){
+    on(type: 'close' | 'message', handle: (data?: string) => void) {
+        switch (type) {
             case 'close':
                 this.onClose = handle;
                 break;
