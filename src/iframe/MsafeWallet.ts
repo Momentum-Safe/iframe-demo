@@ -1,7 +1,6 @@
 import { Connector } from "./connector";
 import { JsonRPCClient } from "./JsonRPCClient";
-import { Account, Option, WalletAPI } from "./MsafeServer";
-import { Payload } from './payload';
+import { Account, WalletAPI, Option, Payload } from "./WalletAPI";
 type onEventFunc = (data: any) => void;
 
 const MsafeOrigin = 'http://localhost:3000';
@@ -54,11 +53,11 @@ export class MsafeWallet implements WalletAPI {
         return this.client.request('signTransaction', [payload, option]);
     }
 
-    async signMessage(message: string | Uint8Array) {
+    async signMessage(message: string | Uint8Array): Promise<Uint8Array> {
         return this.client.request('signMessage', [message]);
     }
-    static async new(): Promise<MsafeWallet> {
-        const connector = await Connector.connect(window.parent, MsafeOrigin);
+    static async new(msafe=MsafeOrigin): Promise<MsafeWallet> {
+        const connector = await Connector.connect(window.parent, msafe);
         return new MsafeWallet(connector);
     }
 }
