@@ -1,5 +1,5 @@
 import { BCS, TxnBuilderTypes } from "aptos";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MsafeWallet } from "./iframe/MsafeWallet";
 import { Buffer } from "buffer";
 
@@ -23,17 +23,17 @@ export function ChildIFrame() {
     const [notification, setNotification] = useState<string>();
 
     // child connect to msafe
-    async function handshake() {
+    const handshake = useCallback(async function () {
         if (wallet) return;
         const w = await MsafeWallet.new();
         w.onChangeAccount((account) =>
-            setNotification(JSON.stringify(account))
+            setNotification(`onChangeAccount:${account}`)
         );
-        w.onChangeNetwork((network) => {
-            setNotification(network);
-        });
+        w.onChangeNetwork((network) => 
+            setNotification(`onChangeNetwork:${network}`)
+        );
         setWallet(w);
-    }
+    }, [wallet]);
     async function connect() {
         if (wallet) {
             try {

@@ -45,70 +45,72 @@ export function IFrame() {
     const accept = useCallback(() => {
         const cleaner = Connector.accepts(dappUrl, (connector) => {
             const webWallet = (window as any).martian;
-            setMsafe(
-                new MsafeServer(connector, {
-                    async connect(): Promise<Account> {
-                        setRequest("connect");
-                        // should return msafe address and public key;
-                        return webWallet.connect();
-                    },
-                    async disconnect(): Promise<void> {
-                        setRequest("disconnect");
-                        return webWallet.disconnect();
-                    },
-                    async network(): Promise<string> {
-                        setRequest("network");
-                        return "Testnet";
-                    },
-                    async account(): Promise<Account> {
-                        setRequest("account");
-                        // should return msafe address and public key;
-                        return webWallet.account();
-                    },
-                    async chainId(): Promise<Number> {
-                        setRequest("chainId");
-                        return webWallet
-                            .getChainId()
-                            .then((r: any) => r.chainId);
-                    },
-                    async signAndSubmit(
-                        payload: Payload,
-                        option?: Option
-                    ): Promise<Uint8Array> {
-                        setRequest("signAndSubmit");
-                        const txn = await buildTransaction(payload, option);
-                        console.log("signAndSubmit:", BCS.bcsToBytes(txn));
-                        // msafe.init_transaction(txn);
-                        // msafe.submit_signature();
-                        // txhash = clien.submitBCSTranscion(...);
-                        // ...
-                        const fakeTxHash = new Uint8Array(32);
-                        fakeTxHash.set(
-                            BCS.bcsToBytes(txn.payload).subarray(0, 32)
-                        );
-                        return fakeTxHash;
-                    },
-                    async signTransaction(
-                        payload: Payload,
-                        option?: Option
-                    ): Promise<Uint8Array> {
-                        setRequest("signTransaction");
-                        const txn = await buildTransaction(payload, option);
-                        console.log("signTransaction:", BCS.bcsToBytes(txn));
-                        // msafe.init_transaction(txn);
-                        // msafe.submit_signature();
-                        // multiTxn =
-                        const fakeSignedTxn = txn;
-                        return BCS.bcsToBytes(fakeSignedTxn);
-                    },
-                    async signMessage(
-                        message: string | Uint8Array
-                    ): Promise<Uint8Array> {
-                        setRequest("signMessage");
-                        throw Error("unsupport");
-                    },
-                })
-            );
+            const server = new MsafeServer(connector, {
+                async connect(): Promise<Account> {
+                    setRequest("connect");
+                    // should return msafe address and public key;
+                    return webWallet.connect();
+                },
+                async disconnect(): Promise<void> {
+                    setRequest("disconnect");
+                    return webWallet.disconnect();
+                },
+                async network(): Promise<string> {
+                    setRequest("network");
+                    return webWallet.network();
+                },
+                async account(): Promise<Account> {
+                    setRequest("account");
+                    // should return msafe address and public key;
+                    return webWallet.account();
+                },
+                async chainId(): Promise<Number> {
+                    setRequest("chainId");
+                    return webWallet.getChainId().then((r: any) => r.chainId);
+                },
+                async signAndSubmit(
+                    payload: Payload,
+                    option?: Option
+                ): Promise<Uint8Array> {
+                    setRequest("signAndSubmit");
+                    const txn = await buildTransaction(payload, option);
+                    console.log("signAndSubmit:", BCS.bcsToBytes(txn));
+                    // msafe.init_transaction(txn);
+                    // msafe.submit_signature();
+                    // txhash = clien.submitBCSTranscion(...);
+                    // ...
+                    const fakeTxHash = new Uint8Array(32);
+                    fakeTxHash.set(BCS.bcsToBytes(txn.payload).subarray(0, 32));
+                    return fakeTxHash;
+                },
+                async signTransaction(
+                    payload: Payload,
+                    option?: Option
+                ): Promise<Uint8Array> {
+                    setRequest("signTransaction");
+                    const txn = await buildTransaction(payload, option);
+                    console.log("signTransaction:", BCS.bcsToBytes(txn));
+                    // msafe.init_transaction(txn);
+                    // msafe.submit_signature();
+                    // multiTxn =
+                    const fakeSignedTxn = txn;
+                    return BCS.bcsToBytes(fakeSignedTxn);
+                },
+                async signMessage(
+                    message: string | Uint8Array
+                ): Promise<Uint8Array> {
+                    setRequest("signMessage");
+                    throw Error("unsupport");
+                },
+            });
+
+            setMsafe(server);
+            webWallet.onNetworkChange((network: any) => {
+                server.changeNetwork(network);
+            });
+            webWallet.onAccountChange((account: any) => {
+                server.changeAccount(account);
+            });
         });
         return cleaner;
     }, []);
