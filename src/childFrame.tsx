@@ -20,7 +20,7 @@ const msafeURL = window.origin.includes("localhost")
     : window.origin.replace("127.0.0.1", "localhost");
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
-    const [response, setResponse] = useState<string>();
+    const [response, setResponse] = useState({});
     const [error, setError] = useState<string>();
     const [notification, setNotification] = useState<string>();
 
@@ -40,59 +40,66 @@ export function ChildIFrame() {
         [wallet]
     );
     async function connect() {
+        setError(undefined);
         if (wallet) {
             try {
                 const account = await wallet.connect();
-                setResponse(
-                    `address:${account.address}\npublic key:${account.publicKey}`
-                );
-                setError(undefined);
+                setResponse({
+                    ...response,
+                    address: account.address,
+                    publicKey: account.publicKey,
+                });
             } catch (e: any) {
-                setResponse(undefined);
                 setError(e.message);
             }
         }
     }
     async function disconnect() {
         await wallet?.disconnect();
-        setResponse(undefined);
+        setResponse({});
         setError(undefined);
         setNotification(undefined);
     }
     async function network() {
-        const network = await wallet?.network();
-        setResponse(network);
         setError(undefined);
+        const network = await wallet?.network();
+        setResponse({ ...response, network });
     }
     async function account() {
-        const account = await wallet?.connect();
-        setResponse(
-            `address:${account!.address}\npublic key:${account!.publicKey}`
-        );
         setError(undefined);
+        const account = await wallet!.connect();
+        setResponse({
+            ...response,
+            address: account.address,
+            publicKey: account.publicKey,
+        });
     }
     async function signAndSubmit() {
+        setError(undefined);
         if (wallet) {
             try {
-                const response = await wallet.signAndSubmit(
+                const txid = await wallet.signAndSubmit(
                     BCS.bcsToBytes(fakeTxn)
                 );
-                setResponse(Buffer.from(response).toString("hex"));
-                setError(undefined);
+                setResponse({
+                    ...response,
+                    txid: Buffer.from(txid).toString("hex"),
+                });
             } catch (e: any) {
-                setResponse(undefined);
                 setError(e.message);
             }
         }
     }
     async function signMessage() {
+        setError(undefined);
         if (wallet) {
             try {
                 const sig = await wallet.signMessage("hello");
-                setResponse(Buffer.from(sig).toString("hex"));
-                setError(undefined);
+                setResponse({
+                    ...response,
+                    messageSig: Buffer.from(sig).toString("hex"),
+                });
             } catch (e: any) {
-                setResponse(undefined);
                 setError(e.message);
             }
         }
@@ -100,25 +107,26 @@ export function ChildIFrame() {
     async function signTransaction() {
         if (wallet) {
             try {
-                const response = await wallet.signTransaction(
+                const signedTxn = await wallet.signTransaction(
                     BCS.bcsToBytes(fakeTxn)
                 );
-                setResponse(Buffer.from(response).toString("hex"));
+                setResponse({
+                    ...response,
+                    signedTxn: Buffer.from(signedTxn).toString("hex"),
+                });
                 setError(undefined);
             } catch (e: any) {
-                setResponse(undefined);
                 setError(e.message);
             }
         }
     }
     async function chainId() {
         if (wallet) {
+            setError(undefined);
             try {
-                const response = await wallet.chainId();
-                setResponse(response.toString());
-                setError(undefined);
+                const chainId = await wallet.chainId();
+                setResponse({ ...response, chainId: chainId.toString() });
             } catch (e: any) {
-                setResponse(undefined);
                 setError(e.message);
             }
         }
@@ -149,7 +157,11 @@ export function ChildIFrame() {
                         signTransaction
                     </button>
                     <button onClick={() => signMessage()}>signMessage</button>
-                    <p>response: {response}</p>
+                    <ul>
+                        {Object.entries(response).map(([key, value]) => (
+                            <li key={key}>{`${key}: ${value}`}</li>
+                        ))}
+                    </ul>
                     <p>error: {error}</p>
                     <p>notification: {notification}</p>
                 </>
