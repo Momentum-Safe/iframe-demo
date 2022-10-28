@@ -15,7 +15,9 @@ const fakeTxn = new TxnBuilderTypes.RawTransaction(
     BigInt(1982241224),
     new TxnBuilderTypes.ChainId(31)
 );
-
+const msafeURL = window.origin.includes("localhost")
+    ? window.origin.replace("localhost", "127.0.0.1")
+    : window.origin.replace("127.0.0.1", "localhost");
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState<string>();
@@ -23,22 +25,27 @@ export function ChildIFrame() {
     const [notification, setNotification] = useState<string>();
 
     // child connect to msafe
-    const handshake = useCallback(async function () {
-        if (wallet) return;
-        const w = await MsafeWallet.new();
-        w.onChangeAccount((account) =>
-            setNotification(`onChangeAccount:${account}`)
-        );
-        w.onChangeNetwork((network) => 
-            setNotification(`onChangeNetwork:${network}`)
-        );
-        setWallet(w);
-    }, [wallet]);
+    const handshake = useCallback(
+        async function () {
+            if (wallet) return;
+            const w = await MsafeWallet.new(msafeURL);
+            w.onChangeAccount((account) =>
+                setNotification(`onChangeAccount:${account}`)
+            );
+            w.onChangeNetwork((network) =>
+                setNotification(`onChangeNetwork:${network}`)
+            );
+            setWallet(w);
+        },
+        [wallet]
+    );
     async function connect() {
         if (wallet) {
             try {
                 const account = await wallet.connect();
-                setResponse(`address:${account.address}\npublic key:${account.publicKey}`);
+                setResponse(
+                    `address:${account.address}\npublic key:${account.publicKey}`
+                );
                 setError(undefined);
             } catch (e: any) {
                 setResponse(undefined);
@@ -59,7 +66,9 @@ export function ChildIFrame() {
     }
     async function account() {
         const account = await wallet?.connect();
-        setResponse(`address:${account!.address}\npublic key:${account!.publicKey}`);
+        setResponse(
+            `address:${account!.address}\npublic key:${account!.publicKey}`
+        );
         setError(undefined);
     }
     async function signAndSubmit() {
@@ -120,23 +129,31 @@ export function ChildIFrame() {
     return (
         <>
             <p>===================child frame: {window.location.href}</p>
-            <button onClick={() => connect()}>connect</button>
-            <button onClick={() => disconnect()}>disconnect</button>
-            <button onClick={() => network()}>network</button>
-            <button onClick={() => account()}>account</button>
-            <button onClick={() => chainId()}>chainId</button>
-            <button onClick={() => signAndSubmit()}>signAndSubmit</button>
-            <button onClick={() => signTransaction()}>signTransaction</button>
-            <button onClick={() => signMessage()}>signMessage</button>
             <p>
                 handshake:
                 {wallet && wallet.client.connector.connected
                     ? "connected"
                     : "disconnected"}
             </p>
-            <p>response: {response}</p>
-            <p>error: {error}</p>
-            <p>notification: {notification}</p>
+            {wallet && wallet.client.connector.connected && (
+                <>
+                    <button onClick={() => connect()}>connect</button>
+                    <button onClick={() => disconnect()}>disconnect</button>
+                    <button onClick={() => network()}>network</button>
+                    <button onClick={() => account()}>account</button>
+                    <button onClick={() => chainId()}>chainId</button>
+                    <button onClick={() => signAndSubmit()}>
+                        signAndSubmit
+                    </button>
+                    <button onClick={() => signTransaction()}>
+                        signTransaction
+                    </button>
+                    <button onClick={() => signMessage()}>signMessage</button>
+                    <p>response: {response}</p>
+                    <p>error: {error}</p>
+                    <p>notification: {notification}</p>
+                </>
+            )}
         </>
     );
 }

@@ -125,20 +125,23 @@ export function IFrame() {
     return (
         <>
             <p>===================msafe frame: {window.location.href}</p>
-            <button onClick={() => setEnIframe(true)}>load iframe</button>
-            <button
-                onClick={() =>
-                    msafe && msafe.changeNetwork(window.location.href)
-                }
-            >
-                notify
-            </button>
             <p>
                 handshake:
                 {msafe && msafe.server.connector.connected
                     ? "connected"
                     : "disconnected"}
             </p>
+            {!(msafe && msafe.server.connector.connected) ? (
+                <button onClick={() => setEnIframe(true)}>load iframe</button>
+            ) : (
+                <button
+                    onClick={() =>
+                        msafe && msafe.changeNetwork(window.location.href)
+                    }
+                >
+                    notify
+                </button>
+            )}
             <p>request: {request}</p>
             {enIframe && (
                 <iframe
