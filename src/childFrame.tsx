@@ -15,8 +15,8 @@ const fakeTxn = new TxnBuilderTypes.RawTransaction(
     BigInt(1982241224),
     new TxnBuilderTypes.ChainId(31)
 );
-const msafeUrl = "http://localhost:3000";
-function ChildIFrame() {
+
+export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState<string>();
     const [error, setError] = useState<string>();

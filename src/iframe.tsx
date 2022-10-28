@@ -15,7 +15,9 @@ import { Payload, Option, Account } from "./iframe/WalletAPI";
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
 );
-const dappUrl = "http://127.0.0.1:3001";
+const dappUrl = window.origin.includes("localhost")
+    ? window.origin.replace("localhost", "127.0.0.1")
+    : window.origin.replace("127.0.0.1", "localhost");
 
 async function buildTransaction(
     payload: Payload,
@@ -95,7 +97,7 @@ export function IFrame() {
                         console.log("signTransaction:", BCS.bcsToBytes(txn));
                         // msafe.init_transaction(txn);
                         // msafe.submit_signature();
-                        // multiTxn = 
+                        // multiTxn =
                         const fakeSignedTxn = txn;
                         return BCS.bcsToBytes(fakeSignedTxn);
                     },
