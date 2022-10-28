@@ -48,6 +48,9 @@ export function ChildIFrame() {
     }
     async function disconnect() {
         await wallet?.disconnect();
+        setResponse(undefined);
+        setError(undefined);
+        setNotification(undefined);
     }
     async function network() {
         const network = await wallet?.network();
