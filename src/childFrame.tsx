@@ -67,12 +67,16 @@ export function ChildIFrame() {
     }
     async function account() {
         setError(undefined);
-        const account = await wallet!.connect();
-        setResponse({
-            ...response,
-            address: account.address,
-            publicKey: account.publicKey,
-        });
+        try {
+            const account = await wallet!.account();
+            setResponse({
+                ...response,
+                address: account.address,
+                publicKey: account.publicKey,
+            });
+        } catch (e: any) {
+            setError(e.message);
+        }
     }
     async function signAndSubmit() {
         setError(undefined);
