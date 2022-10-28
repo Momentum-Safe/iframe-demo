@@ -3,6 +3,7 @@ import { JsonRPCClient } from "./JsonRPCClient";
 import { Account, WalletAPI, Option, Payload } from "./WalletAPI";
 type onEventFunc = (data: any) => void;
 
+// TODO: replace to real msafe website
 const MsafeOrigin = 'http://localhost:3000';
 export class MsafeWallet implements WalletAPI {
     static ChangeAccountEvent = 'ChangeAccount';
