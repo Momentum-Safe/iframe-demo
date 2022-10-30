@@ -1,6 +1,7 @@
 import { BCS, TxnBuilderTypes } from "aptos";
 import { useCallback, useEffect, useState } from "react";
-import { MsafeWallet } from "./iframe/MsafeWallet";
+import { MsafeWallet} from "msafe-iframe";
+
 import { Buffer } from "buffer";
 
 const fakePayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
@@ -59,6 +60,11 @@ export function ChildIFrame() {
         setResponse({});
         setError(undefined);
         setNotification(undefined);
+    }
+    async function isConnected() {
+        setError(undefined);
+        const isConnected = await wallet?.isConnected();
+        setResponse({...response, isConnected});
     }
     async function network() {
         setError(undefined);
@@ -151,6 +157,7 @@ export function ChildIFrame() {
                 <>
                     <button onClick={() => connect()}>connect</button>
                     <button onClick={() => disconnect()}>disconnect</button>
+                    <button onClick={() => isConnected()}>isConnected</button>
                     <button onClick={() => network()}>network</button>
                     <button onClick={() => account()}>account</button>
                     <button onClick={() => chainId()}>chainId</button>

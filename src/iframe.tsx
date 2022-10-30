@@ -3,14 +3,11 @@ import {
     TransactionBuilderRemoteABI,
     TxnBuilderTypes,
     AptosClient,
-    TransactionBuilder,
-    HexString,
-    AptosAccount,
 } from "aptos";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Connector } from "./iframe/connector";
-import { MsafeServer } from "./iframe/MsafeServer";
-import { Payload, Option, Account } from "./iframe/WalletAPI";
+import { Connector,MsafeServer,WalletRPC } from "msafe-iframe";
+import { Payload, Option, Account } from "msafe-iframe";
+
 
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
@@ -47,32 +44,36 @@ export function IFrame() {
             const webWallet = (window as any).martian;
             const server = new MsafeServer(connector, {
                 async connect(): Promise<Account> {
-                    setRequest("connect");
+                    setRequest(WalletRPC.connect);
                     // should return msafe address and public key;
                     return webWallet.connect();
                 },
                 async disconnect(): Promise<void> {
-                    setRequest("disconnect");
+                    setRequest(WalletRPC.disconnect);
                     return webWallet.disconnect();
                 },
+                async isConnected(): Promise<boolean> {
+                    setRequest(WalletRPC.isConnected);
+                    return webWallet.isConnected();
+                },
                 async network(): Promise<string> {
-                    setRequest("network");
+                    setRequest(WalletRPC.network);
                     return webWallet.network();
                 },
                 async account(): Promise<Account> {
-                    setRequest("account");
+                    setRequest(WalletRPC.account);
                     // should return msafe address and public key;
                     return webWallet.account();
                 },
                 async chainId(): Promise<Number> {
-                    setRequest("chainId");
+                    setRequest(WalletRPC.chainId);
                     return webWallet.getChainId().then((r: any) => r.chainId);
                 },
                 async signAndSubmit(
                     payload: Payload,
                     option?: Option
                 ): Promise<Uint8Array> {
-                    setRequest("signAndSubmit");
+                    setRequest(WalletRPC.signAndSubmit);
                     const txn = await buildTransaction(payload, option);
                     console.log("signAndSubmit:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
@@ -87,7 +88,7 @@ export function IFrame() {
                     payload: Payload,
                     option?: Option
                 ): Promise<Uint8Array> {
-                    setRequest("signTransaction");
+                    setRequest(WalletRPC.signTransaction);
                     const txn = await buildTransaction(payload, option);
                     console.log("signTransaction:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
@@ -99,7 +100,7 @@ export function IFrame() {
                 async signMessage(
                     message: string | Uint8Array
                 ): Promise<Uint8Array> {
-                    setRequest("signMessage");
+                    setRequest(WalletRPC.signMessage);
                     throw Error("unsupport");
                 },
             });
