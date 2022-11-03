@@ -1,6 +1,6 @@
 import { BCS, TxnBuilderTypes } from "aptos";
 import { useCallback, useEffect, useState } from "react";
-import { MsafeWallet} from "msafe-iframe";
+import { MsafeWallet } from "msafe-iframe";
 
 import { Buffer } from "buffer";
 
@@ -64,7 +64,7 @@ export function ChildIFrame() {
     async function isConnected() {
         setError(undefined);
         const isConnected = await wallet?.isConnected();
-        setResponse({...response, isConnected});
+        setResponse({ ...response, isConnected });
     }
     async function network() {
         setError(undefined);
