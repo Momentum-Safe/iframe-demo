@@ -6365,10 +6365,10 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msafe-iframe@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/msafe-iframe/-/msafe-iframe-1.0.7.tgz#1cccb07f60e89248e3158cc3e3a49fbf00de3d87"
-  integrity sha512-m4+aCreGH+6KqAXdnjsSLPk5tzVX8eFAzmhnGB2FcVQnLinbOl/+GTH6qEz16zXSQ7yfKMLagd3rs37/tG1sHA==
+msafe-iframe@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/msafe-iframe/-/msafe-iframe-1.0.8.tgz#b80ddee60a401e62a02e71deb8005cf88db3ac3e"
+  integrity sha512-wh6YFECkW36wK3avowcuoOezSrGpV5tv7269QQcn2jDeisLzQ3tkoAQXwM9pFRc2YvyNKGsgG99S0knLp4NnfA==
   dependencies:
     buffer "^6.0.3"
     json-rpc-protocol "^0.13.2"
