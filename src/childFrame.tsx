@@ -51,7 +51,8 @@ export function ChildIFrame() {
                     publicKey: account.publicKey,
                 });
             } catch (e: any) {
-                setError(e.message);
+                console.log('err:', e);
+                setError(e);
             }
         }
     }
@@ -81,7 +82,7 @@ export function ChildIFrame() {
                 publicKey: account.publicKey,
             });
         } catch (e: any) {
-            setError(e.message);
+            setError(e);
         }
     }
     async function signAndSubmit() {
@@ -96,7 +97,7 @@ export function ChildIFrame() {
                     txid: Buffer.from(txid).toString("hex"),
                 });
             } catch (e: any) {
-                setError(e.message);
+                setError(e);
             }
         }
     }
@@ -110,7 +111,7 @@ export function ChildIFrame() {
                     messageSig: Buffer.from(sig).toString("hex"),
                 });
             } catch (e: any) {
-                setError(e.message);
+                setError(e);
             }
         }
     }
@@ -126,7 +127,7 @@ export function ChildIFrame() {
                 });
                 setError(undefined);
             } catch (e: any) {
-                setError(e.message);
+                setError(e);
             }
         }
     }
@@ -137,7 +138,7 @@ export function ChildIFrame() {
                 const chainId = await wallet.chainId();
                 setResponse({ ...response, chainId: chainId.toString() });
             } catch (e: any) {
-                setError(e.message);
+                setError(e);
             }
         }
     }
