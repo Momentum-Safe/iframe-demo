@@ -12,6 +12,8 @@ import { Payload, Option, Account } from "msafe-iframe";
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
 );
+
+// REVIEW: What is this used for?
 const dappUrl = window.origin.includes("localhost")
     ? window.origin.replace("localhost", "127.0.0.1")
     : window.origin.replace("127.0.0.1", "localhost");
