@@ -23,6 +23,7 @@ const msafeURL = window.origin.includes("localhost")
     : window.origin.replace("127.0.0.1", "localhost");
 
 
+// REVIEW: shall we make these functions as a ts SDK?
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState({});
