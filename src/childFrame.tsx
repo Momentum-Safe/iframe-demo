@@ -16,9 +16,13 @@ const fakeTxn = new TxnBuilderTypes.RawTransaction(
     BigInt(1982241224),
     new TxnBuilderTypes.ChainId(31)
 );
+
+// REVIEW: Why replace localhost to 127.0.0.1, and 127.0.0.1 to localhost
 const msafeURL = window.origin.includes("localhost")
     ? window.origin.replace("localhost", "127.0.0.1")
     : window.origin.replace("127.0.0.1", "localhost");
+
+
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState({});
