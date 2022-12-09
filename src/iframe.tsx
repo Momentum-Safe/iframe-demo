@@ -5,9 +5,8 @@ import {
     AptosClient,
 } from "aptos";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Connector,MsafeServer,WalletRPC } from "msafe-iframe";
+import { Connector, MsafeServer, WalletRPC } from "msafe-iframe";
 import { Payload, Option, Account } from "msafe-iframe";
-
 
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
@@ -18,24 +17,46 @@ const dappUrl = window.origin.includes("localhost")
 
 async function buildTransaction(
     payload: Payload,
-    option?: Option
+    option?: Option & {sender: string},
 ): Promise<TxnBuilderTypes.RawTransaction> {
     if (payload instanceof Uint8Array) {
         const deserializer = new BCS.Deserializer(payload);
         return TxnBuilderTypes.RawTransaction.deserialize(deserializer);
     }
-    const txnBuilder = new TransactionBuilderRemoteABI(aptosClient, option!);
-    const moduleId = TxnBuilderTypes.ModuleId.fromStr(payload.function);
-    return txnBuilder.build(
-        moduleId.name.value,
+
+    const builderOption = {
+        sender: option!.sender,
+        sequenceNumber: option?.sequence_number,
+        gasUnitPrice: option?.gas_unit_price,
+        maxGasAmount: option?.max_gas_amount,
+    };
+
+    option?.sequence_number || delete builderOption.sequenceNumber;
+    option?.gas_unit_price || delete builderOption.gasUnitPrice;
+    option?.max_gas_amount || delete builderOption.maxGasAmount;
+
+    const txnBuilder = new TransactionBuilderRemoteABI(aptosClient, builderOption);
+
+    console.log(payload, builderOption);
+
+    const tx = await txnBuilder.build(
+        payload.function,
         payload.type_arguments,
         payload.arguments
-    );
+    ).catch((e) => {
+        console.error(e);
+        throw e;
+    });
+
+    console.log('--tx', tx);
+    if(option?.expiration_timestamp_secs)
+        (tx as any).expiration_timestamp_secs = option.expiration_timestamp_secs;
+    return tx;
 }
 
 export function IFrame() {
     const iframeRef = useRef(null);
-    const [enIframe, setEnIframe] = useState(false);
+    const [enIframe, setEnIframe] = useState<boolean | string>(false);
     const [msafe, setMsafe] = useState<MsafeServer>();
     const [request, setRequest] = useState<string>();
 
@@ -67,6 +88,7 @@ export function IFrame() {
                 },
                 async chainId(): Promise<Number> {
                     setRequest(WalletRPC.chainId);
+                    console.log("server:chainId");
                     return webWallet.getChainId().then((r: any) => r.chainId);
                 },
                 async signAndSubmit(
@@ -74,7 +96,9 @@ export function IFrame() {
                     option?: Option
                 ): Promise<Uint8Array> {
                     setRequest(WalletRPC.signAndSubmit);
-                    const txn = await buildTransaction(payload, option);
+                    const msafeAddress = await webWallet.account().then((acc:any) => acc.address);
+                    const txn = await buildTransaction(payload, {sender: msafeAddress, ...option});
+                    console.log("signAndSubmit:", txn);
                     console.log("signAndSubmit:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
                     // msafe.submit_signature();
@@ -88,8 +112,10 @@ export function IFrame() {
                     payload: Payload,
                     option?: Option
                 ): Promise<Uint8Array> {
+                    console.log("signTransaction:", payload, option);
                     setRequest(WalletRPC.signTransaction);
-                    const txn = await buildTransaction(payload, option);
+                    const msafeAddress = await webWallet.account().then((acc:any) => acc.address);
+                    const txn = await buildTransaction(payload, {sender: msafeAddress, ...option});
                     console.log("signTransaction:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
                     // msafe.submit_signature();
@@ -110,7 +136,10 @@ export function IFrame() {
                 server.changeNetwork(network);
             });
             webWallet.onAccountChange((account: any) => {
-                server.changeAccount(account);
+                console.log("onAccountChange:", account);
+                webWallet
+                    .account()
+                    .then((account:any) => server.changeAccount(account));
             });
         });
         return cleaner;
@@ -132,9 +161,20 @@ export function IFrame() {
                     ? "connected"
                     : "disconnected"}
             </p>
-            {!(msafe && msafe.server.connector.connected) ? (
-                <button onClick={() => setEnIframe(true)}>load iframe</button>
-            ) : (
+            <button onClick={() => setEnIframe("child")}>load iframe</button>
+            <button onClick={() => setEnIframe("adaptor")}>
+                load iframe adaptor
+            </button>
+            <button
+                onClick={() =>
+                    setEnIframe(
+                        "http://localhost:3001/pontem-wallet-demo#/wallet-adapter"
+                    )
+                }
+            >
+                load another adaptor
+            </button>
+            {msafe && msafe.server.connector.connected && (
                 <button
                     onClick={() =>
                         msafe && msafe.changeNetwork(window.location.href)
@@ -143,6 +183,7 @@ export function IFrame() {
                     notify
                 </button>
             )}
+
             <p>request: {request}</p>
             {enIframe && (
                 <iframe
@@ -150,11 +191,13 @@ export function IFrame() {
                     title="Dapp"
                     width="100%"
                     height="400hv"
-                    src={dappUrl + "/child"}
+                    src={
+                        String(enIframe).startsWith("http")
+                            ? String(enIframe)
+                            : dappUrl + `/#/${enIframe}`
+                    }
                 />
             )}
         </>
     );
 }
-
-export default IFrame;
