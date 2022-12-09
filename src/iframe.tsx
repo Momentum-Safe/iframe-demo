@@ -37,8 +37,6 @@ async function buildTransaction(
 
     const txnBuilder = new TransactionBuilderRemoteABI(aptosClient, builderOption);
 
-    console.log(payload, builderOption);
-
     const tx = await txnBuilder.build(
         payload.function,
         payload.type_arguments,
@@ -48,7 +46,6 @@ async function buildTransaction(
         throw e;
     });
 
-    console.log('--tx', tx);
     if(option?.expiration_timestamp_secs)
         (tx as any).expiration_timestamp_secs = option.expiration_timestamp_secs;
     return tx;
@@ -98,8 +95,6 @@ export function IFrame() {
                     setRequest(WalletRPC.signAndSubmit);
                     const msafeAddress = await webWallet.account().then((acc:any) => acc.address);
                     const txn = await buildTransaction(payload, {sender: msafeAddress, ...option});
-                    console.log("signAndSubmit:", txn);
-                    console.log("signAndSubmit:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
                     // msafe.submit_signature();
                     // txhash = clien.submitBCSTranscion(...);
@@ -112,11 +107,9 @@ export function IFrame() {
                     payload: Payload,
                     option?: Option
                 ): Promise<Uint8Array> {
-                    console.log("signTransaction:", payload, option);
                     setRequest(WalletRPC.signTransaction);
                     const msafeAddress = await webWallet.account().then((acc:any) => acc.address);
                     const txn = await buildTransaction(payload, {sender: msafeAddress, ...option});
-                    console.log("signTransaction:", BCS.bcsToBytes(txn));
                     // msafe.init_transaction(txn);
                     // msafe.submit_signature();
                     // multiTxn =
