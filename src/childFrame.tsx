@@ -1,60 +1,12 @@
 import { AptosClient, BCS, TxnBuilderTypes } from "aptos";
 import { useCallback, useEffect, useState } from "react";
 import { MsafeWallet } from "msafe-iframe";
+//const { MsafeWallet } = require("msafe-iframe");
 
 import { Buffer } from "buffer";
+import { fakePayload, fakeTxn } from "./fakeTransaction";
 
-const aptosClient = new AptosClient(
-    "https://fullnode.testnet.aptoslabs.com/v1"
-);
-
-const COIN_MODULE = "0x1::coin";
-const TRANSFER_METHOD = "transfer";
-const APTOS_TOKEN = "0x1::aptos_coin::AptosCoin";
-
-let from = "0x8284169a7564153e0d767176164db1466f5b2ba03abfd587702d44c7dda0a690";
-const to = "0xe3785fa2ccd744e7799b271b624bb2557fbf5d466b72a1b11f3d3ebc0037434f";
-const amount = 12345n;
-
-const fakePayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
-    TxnBuilderTypes.EntryFunction.natural(
-        COIN_MODULE,
-        TRANSFER_METHOD,
-        [
-            new TxnBuilderTypes.TypeTagStruct(
-                TxnBuilderTypes.StructTag.fromString(APTOS_TOKEN)
-            ),
-        ],
-        [
-            BCS.bcsToBytes(TxnBuilderTypes.AccountAddress.fromHex(to)),
-            BCS.bcsSerializeUint64(amount),
-        ]
-    )
-);
-
-const fakePayload1 = {
-    function: `${COIN_MODULE}::${TRANSFER_METHOD}`,
-    type_arguments: [APTOS_TOKEN],
-    arguments: [to, amount],
-};
-const fakeOption = {
-    sender: from,
-    gas_unit_price: 100n,
-};
-
-const fakeTxn = async () => {
-    const { sequence_number } = await aptosClient.getAccount(from);
-    const chainId = await aptosClient.getChainId();
-    return new TxnBuilderTypes.RawTransaction(
-        TxnBuilderTypes.AccountAddress.fromHex(fakeOption.sender),
-        BigInt(sequence_number),
-        fakePayload,
-        10000n,
-        fakeOption.gas_unit_price,
-        BigInt(Math.floor(Date.now() / 1000) + 600),
-        new TxnBuilderTypes.ChainId(chainId)
-    );
-};
+let sender = '';
 
 const msafeURL = window.origin.includes("localhost")
     ? window.origin.replace("localhost", "127.0.0.1")
@@ -85,7 +37,7 @@ export function ChildIFrame() {
         if (wallet) {
             try {
                 const account = await wallet.connect();
-                from = account.address;
+                sender = account.address;
                 setResponse({
                     ...response,
                     address: account.address,
@@ -131,11 +83,8 @@ export function ChildIFrame() {
         if (wallet) {
             try {
                 const txid = bcs
-                    ? await wallet.signAndSubmit(BCS.bcsToBytes(await fakeTxn()))
-                    : await wallet.signAndSubmit(
-                          fakePayload1,
-                          fakeOption
-                      );
+                    ? await wallet.signAndSubmit(BCS.bcsToBytes(await fakeTxn(sender)))
+                    : await fakePayload(sender).then(({payload, option})=>wallet.signAndSubmit(payload, option));
                 setResponse({
                     ...response,
                     txid: Buffer.from(txid).toString("hex"),
@@ -164,10 +113,7 @@ export function ChildIFrame() {
             try {
                 const signedTxn = bcs
                     ? await wallet.signTransaction(BCS.bcsToBytes(await fakeTxn()))
-                    : await wallet.signTransaction(
-                          fakePayload1,
-                          fakeOption
-                      );
+                    : await fakePayload().then(({payload, option})=>wallet.signTransaction(payload, option));
                 setResponse({
                     ...response,
                     signedTxn: Buffer.from(signedTxn).toString("hex"),

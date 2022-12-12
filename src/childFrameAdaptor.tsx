@@ -1,25 +1,13 @@
-import { BCS, TxnBuilderTypes } from "aptos";
 import { useState, useCallback } from "react";
 
 import { useWallet, MsafeWalletName } from "@manahippo/aptos-wallet-adapter";
 
 import { Buffer } from "buffer";
+import { fakePayload } from "./fakeTransaction";
 
 const WalletName = MsafeWalletName;
 console.log("-w:", WalletName);
 
-const fakePayload = new TxnBuilderTypes.TransactionPayloadEntryFunction(
-    TxnBuilderTypes.EntryFunction.natural("0x1::coin", "transfer", [], [])
-);
-const fakeTxn = new TxnBuilderTypes.RawTransaction(
-    TxnBuilderTypes.AccountAddress.fromHex("0x123"),
-    BigInt(0),
-    fakePayload,
-    BigInt(10000),
-    BigInt(100),
-    BigInt(1982241224),
-    new TxnBuilderTypes.ChainId(31)
-);
 export function ChildIFrameAdaptor() {
     const {
         account,
@@ -64,8 +52,9 @@ export function ChildIFrameAdaptor() {
         setError(undefined);
         if (wallet) {
             try {
+                const {payload, option} = await fakePayload(account!.address!.toString());
                 const {hash} = await signAndSubmitTransaction(
-                    BCS.bcsToBytes(fakeTxn) as any
+                    payload, option
                 );
                 setResponse({
                     ...response,
@@ -93,8 +82,9 @@ export function ChildIFrameAdaptor() {
     async function doSignTransaction() {
         if (wallet) {
             try {
+                const {payload, option} = await fakePayload(account!.address!.toString());
                 const signedTxn = await signTransaction(
-                    BCS.bcsToBytes(fakeTxn) as any
+                    payload, option
                 );
                 console.log('=:', signedTxn);
                 setResponse({
