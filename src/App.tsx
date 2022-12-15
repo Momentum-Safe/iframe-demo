@@ -25,7 +25,7 @@ function App() {
         <HashRouter>
             <div className="app">
                 <Routes>
-                    <Route index element={<IFrame />} />
+                    <Route index element={<ChildIFrame />} />
                     <Route path="/child" element={<ChildIFrame />} />
                     <Route
                         path="/adaptor"

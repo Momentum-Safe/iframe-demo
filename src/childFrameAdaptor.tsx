@@ -42,7 +42,7 @@ export function ChildIFrameAdaptor() {
     const handleAdapterClick = useCallback(async () => {
         try {
             await handleConnect(WalletName);
-            select(WalletName);
+            //select(WalletName);
         } catch (error) {
             console.log(error);
         }
