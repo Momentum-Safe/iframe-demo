@@ -10,9 +10,7 @@ import {
     MsafeWalletAdapter,
 } from "@manahippo/aptos-wallet-adapter";
 
-const msafeURL = window.origin.includes("localhost")
-    ? window.origin.replace("localhost", "127.0.0.1")
-    : window.origin.replace("127.0.0.1", "localhost");
+const msafeURL = 'https://partner.m-safe.io';
 const wallets = [
     new MartianWalletAdapter(),
     new PontemWalletAdapter(),
@@ -25,7 +23,7 @@ function App() {
         <HashRouter>
             <div className="app">
                 <Routes>
-                    <Route index element={<IFrame />} />
+                    <Route index element={<ChildIFrame />} />
                     <Route path="/child" element={<ChildIFrame />} />
                     <Route
                         path="/adaptor"

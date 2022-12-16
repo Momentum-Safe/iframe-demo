@@ -1,21 +1,23 @@
-import { AptosClient, BCS, TxnBuilderTypes } from "aptos";
+import { BCS } from "aptos";
 import { useCallback, useEffect, useState } from "react";
-import { MsafeWallet } from "msafe-iframe";
-//const { MsafeWallet } = require("msafe-iframe");
+import { MsafeWallet } from "msafe-wallet";
+//const { MsafeWallet } = require("msafe-wallet");
 
 import { Buffer } from "buffer";
 import { fakePayload, fakeTxn } from "./fakeTransaction";
 
 let sender = '';
 
-const msafeURL = window.origin.includes("localhost")
-    ? window.origin.replace("localhost", "127.0.0.1")
-    : window.origin.replace("127.0.0.1", "localhost");
+const msafeURL = 'https://partner.m-safe.io';
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState({});
     const [error, setError] = useState<string>();
     const [notification, setNotification] = useState<string>();
+    const selectMsafe = true;
+    if(selectMsafe && !MsafeWallet.inMsafeWallet()){
+        window.location.replace(MsafeWallet.getAppUrl(msafeURL));
+    }
 
     // child connect to msafe
     const handshake = useCallback(
@@ -108,22 +110,6 @@ export function ChildIFrame() {
             }
         }
     }
-    async function signTransaction(bcs = true) {
-        if (wallet) {
-            try {
-                const signedTxn = bcs
-                    ? await wallet.signTransaction(BCS.bcsToBytes(await fakeTxn()))
-                    : await fakePayload().then(({payload, option})=>wallet.signTransaction(payload, option));
-                setResponse({
-                    ...response,
-                    signedTxn: Buffer.from(signedTxn).toString("hex"),
-                });
-                setError(undefined);
-            } catch (e: any) {
-                setError(e);
-            }
-        }
-    }
     async function chainId() {
         if (wallet) {
             setError(undefined);
@@ -160,12 +146,6 @@ export function ChildIFrame() {
                     </button>
                     <button onClick={() => signAndSubmit(false)}>
                         signAndSubmit-PAYLOAD
-                    </button>
-                    <button onClick={() => signTransaction()}>
-                        signTransaction-BCS
-                    </button>
-                    <button onClick={() => signTransaction(false)}>
-                        signTransaction-PAYLOAD
                     </button>
                     <button onClick={() => signMessage()}>signMessage</button>
                     <ul>
