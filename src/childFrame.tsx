@@ -1,7 +1,6 @@
-import { AptosClient, BCS, TxnBuilderTypes } from "aptos";
+import { BCS } from "aptos";
 import { useCallback, useEffect, useState } from "react";
-import { MsafeWallet } from "msafe-iframe";
-//const { MsafeWallet } = require("msafe-iframe");
+import { MsafeWallet } from "msafe-wallet";
 
 import { Buffer } from "buffer";
 import { fakePayload, fakeTxn } from "./fakeTransaction";
@@ -21,7 +20,9 @@ export function ChildIFrame() {
     const handshake = useCallback(
         async function () {
             if (wallet) return;
+            if (!MsafeWallet.inMsafeWallet()) return;
             const w = await MsafeWallet.new(msafeURL);
+            console.log("client-version", w.version);
             w.onChangeAccount((account) =>
                 setNotification(`onChangeAccount:${account}`)
             );

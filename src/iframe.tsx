@@ -5,8 +5,8 @@ import {
     AptosClient,
 } from "aptos";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Connector, MsafeServer, WalletRPC } from "msafe-iframe";
-import { Payload, Option, Account } from "msafe-iframe";
+import { Connector, MsafeServer, WalletRPC } from "msafe-wallet";
+import { Payload, Option, Account } from "msafe-wallet";
 
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
@@ -123,6 +123,7 @@ export function IFrame() {
                     throw Error("unsupport");
                 },
             });
+            console.log("server-version:", server.version)
 
             setMsafe(server);
             webWallet.onNetworkChange((network: any) => {

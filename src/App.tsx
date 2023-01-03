@@ -16,8 +16,12 @@ const msafeURL = window.origin.includes("localhost")
 const wallets = [
     new MartianWalletAdapter(),
     new PontemWalletAdapter(),
-    new MsafeWalletAdapter(msafeURL),
-];
+] as any[];
+const withAdaptor = window.location.hash.includes("adaptor");
+if(withAdaptor) {
+    wallets.push(new MsafeWalletAdapter(msafeURL));
+}
+
 const localStorageKey = 'hippoWallet';
 
 function App() {

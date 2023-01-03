@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-import { useWallet, MsafeWalletName } from "@manahippo/aptos-wallet-adapter";
+import { useWallet, MsafeWalletName, MsafeWalletAdapter } from "@manahippo/aptos-wallet-adapter";
 
 import { Buffer } from "buffer";
 import { fakePayload } from "./fakeTransaction";
