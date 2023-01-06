@@ -51,6 +51,8 @@ async function buildTransaction(
     return tx;
 }
 
+let no = 0;
+
 export function IFrame() {
     const iframeRef = useRef(null);
     const [enIframe, setEnIframe] = useState<boolean | string>(false);
@@ -58,10 +60,15 @@ export function IFrame() {
     const [request, setRequest] = useState<string>();
 
     const accept = useCallback(() => {
+        const ano = no++;
+        console.log('accpet:', ano);
         const cleaner = Connector.accepts(dappUrl, (connector) => {
+            console.log('version:', connector.version);
+            cleaner();
             const webWallet = (window as any).martian;
             const server = new MsafeServer(connector, {
                 async connect(): Promise<Account> {
+                    console.log('connect');
                     setRequest(WalletRPC.connect);
                     // should return msafe address and public key;
                     return webWallet.connect();
@@ -123,7 +130,7 @@ export function IFrame() {
                     throw Error("unsupport");
                 },
             });
-            console.log("server-version:", server.version)
+            //console.log("server-version:", server.version)
 
             setMsafe(server);
             webWallet.onNetworkChange((network: any) => {
@@ -136,15 +143,15 @@ export function IFrame() {
                     .then((account:any) => server.changeAccount(account));
             });
         });
-        return cleaner;
+        return ()=>{
+            console.log("cleaner:", ano)
+            cleaner();
+        };
     }, []);
     // msafe accpet connection
     useEffect(() => {
-        const cleaner = accept();
-        return () => {
-            cleaner();
-            msafe && msafe.server.connector.close();
-        };
+        if(!msafe)
+            return accept();
     }, [accept, msafe]);
     return (
         <>

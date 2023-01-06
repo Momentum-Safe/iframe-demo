@@ -7,9 +7,7 @@ import { fakePayload, fakeTxn } from "./fakeTransaction";
 
 let sender = '';
 
-const msafeURL = window.origin.includes("localhost")
-    ? window.origin.replace("localhost", "127.0.0.1")
-    : window.origin.replace("127.0.0.1", "localhost");
+const msafeURL = 'http://localhost:3000';
 export function ChildIFrame() {
     const [wallet, setWallet] = useState<MsafeWallet>();
     const [response, setResponse] = useState({});
@@ -21,8 +19,8 @@ export function ChildIFrame() {
         async function () {
             if (wallet) return;
             if (!MsafeWallet.inMsafeWallet()) return;
-            const w = await MsafeWallet.new(msafeURL);
-            console.log("client-version", w.version);
+            const w = await MsafeWallet.new(['Mainnet', msafeURL]);
+            //console.log("client-version", w.version);
             w.onChangeAccount((account) =>
                 setNotification(`onChangeAccount:${account}`)
             );
@@ -38,11 +36,11 @@ export function ChildIFrame() {
         if (wallet) {
             try {
                 const account = await wallet.connect();
+                console.log('account:', account);
                 sender = account.address;
                 setResponse({
                     ...response,
-                    address: account.address,
-                    publicKey: account.publicKey,
+                    ...account,
                 });
             } catch (e: any) {
                 console.log("err:", e);
@@ -72,8 +70,7 @@ export function ChildIFrame() {
             const account = await wallet!.account();
             setResponse({
                 ...response,
-                address: account.address,
-                publicKey: account.publicKey,
+                ...account,
             });
         } catch (e: any) {
             setError(e);
