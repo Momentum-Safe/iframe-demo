@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 
-import { useWallet, MsafeWalletName, MsafeWalletAdapter } from "@manahippo/aptos-wallet-adapter";
+import { useWallet, MSafeWalletName } from "@manahippo/aptos-wallet-adapter";
 
 import { Buffer } from "buffer";
 import { fakePayload } from "./fakeTransaction";
 
-const WalletName = MsafeWalletName;
+const WalletName = MSafeWalletName;
 console.log("-w:", WalletName);
 
 export function ChildIFrameAdaptor() {

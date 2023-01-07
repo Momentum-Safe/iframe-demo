@@ -1,15 +1,15 @@
 import { BCS } from "aptos";
 import { useCallback, useEffect, useState } from "react";
-import { MsafeWallet } from "msafe-wallet";
+import { MSafeWallet } from "msafe-wallet";
 
 import { Buffer } from "buffer";
 import { fakePayload, fakeTxn } from "./fakeTransaction";
+import { msafeURL } from "./dappURL";
 
 let sender = '';
 
-const msafeURL = 'http://localhost:3000';
 export function ChildIFrame() {
-    const [wallet, setWallet] = useState<MsafeWallet>();
+    const [wallet, setWallet] = useState<MSafeWallet>();
     const [response, setResponse] = useState({});
     const [error, setError] = useState<string>();
     const [notification, setNotification] = useState<string>();
@@ -18,8 +18,8 @@ export function ChildIFrame() {
     const handshake = useCallback(
         async function () {
             if (wallet) return;
-            if (!MsafeWallet.inMsafeWallet()) return;
-            const w = await MsafeWallet.new(['Mainnet', msafeURL]);
+            if (!MSafeWallet.inMSafeWallet()) return;
+            const w = await MSafeWallet.new(['Mainnet', msafeURL]);
             //console.log("client-version", w.version);
             w.onChangeAccount((account) =>
                 setNotification(`onChangeAccount:${account}`)

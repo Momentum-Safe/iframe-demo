@@ -5,15 +5,14 @@ import {
     AptosClient,
 } from "aptos";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Connector, MsafeServer, WalletRPC } from "msafe-wallet";
+import { Connector, MSafeServer, WalletRPC } from "msafe-wallet";
 import { Payload, Option, Account } from "msafe-wallet";
+import { dappUrl } from "./dappURL";
 
 const aptosClient = new AptosClient(
     "https://fullnode.testnet.aptoslabs.com/v1"
 );
-const dappUrl = window.origin.includes("localhost")
-    ? window.origin.replace("localhost", "127.0.0.1")
-    : window.origin.replace("127.0.0.1", "localhost");
+
 
 async function buildTransaction(
     payload: Payload,
@@ -56,7 +55,7 @@ let no = 0;
 export function IFrame() {
     const iframeRef = useRef(null);
     const [enIframe, setEnIframe] = useState<boolean | string>(false);
-    const [msafe, setMsafe] = useState<MsafeServer>();
+    const [msafe, setMsafe] = useState<MSafeServer>();
     const [request, setRequest] = useState<string>();
 
     const accept = useCallback(() => {
@@ -66,7 +65,7 @@ export function IFrame() {
             console.log('version:', connector.version);
             cleaner();
             const webWallet = (window as any).martian;
-            const server = new MsafeServer(connector, {
+            const server = new MSafeServer(connector, {
                 async connect(): Promise<Account> {
                     console.log('connect');
                     setRequest(WalletRPC.connect);

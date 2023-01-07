@@ -7,17 +7,17 @@ import {
     WalletProvider,
     MartianWalletAdapter,
     PontemWalletAdapter,
-    MsafeWalletAdapter,
+    MSafeWalletAdapter,
 } from "@manahippo/aptos-wallet-adapter";
+import { msafeURL } from "./dappURL";
 
-const msafeURL = 'http://localhost:3000';
 const wallets = [
     new MartianWalletAdapter(),
     new PontemWalletAdapter(),
 ] as any[];
 const withAdaptor = window.location.hash.includes("adaptor");
 if(withAdaptor) {
-    wallets.push(new MsafeWalletAdapter(msafeURL));
+    wallets.push(new MSafeWalletAdapter(msafeURL));
 }
 
 const localStorageKey = 'hippoWallet';
