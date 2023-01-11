@@ -17,7 +17,7 @@ const wallets = [
 ] as any[];
 const withAdaptor = window.location.hash.includes("adaptor");
 if(withAdaptor) {
-    wallets.push(new MSafeWalletAdapter(msafeURL));
+    wallets.push(new MSafeWalletAdapter(['Mainnet', msafeURL]));
 }
 
 const localStorageKey = 'hippoWallet';
